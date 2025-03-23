@@ -139,7 +139,7 @@ Sign up at streamlit.io, link your GitHub repo, and deploy the app via Streamlit
 
 **Steps to Use the Application**
 Access the App:
-Open the app URL [(deployed)](https://wordemotions.streamlit.app/)
+Open the app URL [(https://wordemotions.streamlit.app/)](https://wordemotions.streamlit.app/)
 
 **Prediction Tab:**
 Enter text in the text area (default: "I can't believe how amazing this day turned out!").
@@ -162,4 +162,6 @@ Select the number of samples (10–100) and click "Analyze Errors" to see up to 
 ![alt text](images_web/4.png)
 
 ![alt text](images_web/5.png)
+
+https://wordemotions.streamlit.app/
 
