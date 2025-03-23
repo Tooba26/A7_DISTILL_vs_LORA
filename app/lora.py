@@ -13,10 +13,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Load model and tokenizer
 @st.cache_resource
 def load_model():
-    # model_path = "./best_lora_model"
-    # tokenizer = AutoTokenizer.from_pretrained(model_path)
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    # Construct the full path to best_lora_model
     model_path = os.path.join(script_dir, "best_lora_model")
     
     # Load tokenizer and model from the local directory
@@ -45,7 +42,10 @@ emotion_labels = [
     "relief", "remorse", "sadness", "surprise", "neutral"
 ]
 
-# Prediction function
+# Define toxic emotions
+toxic_emotions = ["anger", "annoyance", "disapproval", "disgust", "sadness"]
+
+# Prediction function for emotion
 def predict_emotion(text):
     inputs = tokenizer(text, padding="max_length", truncation=True, max_length=128, return_tensors="pt")
     inputs = {k: v.to(device) for k, v in inputs.items()}
@@ -56,6 +56,10 @@ def predict_emotion(text):
         probabilities = torch.softmax(outputs.logits, dim=-1)[0].cpu().numpy()
     
     return emotion_labels[prediction], probabilities
+
+# Function to determine toxicity
+def predict_toxicity(predicted_emotion):
+    return "Toxic" if predicted_emotion in toxic_emotions else "Non-Toxic"
 
 # Batch prediction function
 def batch_predict(texts):
@@ -69,7 +73,7 @@ def batch_predict(texts):
     return [emotion_labels[pred] for pred in predictions]
 
 # Streamlit app
-st.title("Emotion Prediction with LoRA Model")
+st.title("Emotion and Toxicity Prediction with LoRA Model")
 
 # Sidebar
 st.sidebar.header("Options")
@@ -81,7 +85,7 @@ tab1, tab2, tab3 = st.tabs(["Prediction", "Distribution", "Errors"])
 
 # Prediction Tab
 with tab1:
-    st.header("Emotion Prediction")
+    st.header("Emotion and Toxicity Prediction")
     
     if example_mode:
         st.subheader("Random Examples from GoEmotions")
@@ -91,19 +95,31 @@ with tab1:
         
         for i, (text, true_label) in enumerate(zip(sample_texts, true_labels)):
             predicted_emotion, probs = predict_emotion(text)
+            toxicity = predict_toxicity(predicted_emotion)
             st.write(f"**Example {i+1}**")
             st.write(f"Text: {text}")
             st.write(f"True Emotion: {true_label}")
             st.write(f"Predicted Emotion: {predicted_emotion}")
+            st.write(f"Toxicity: **{toxicity}**")
             st.bar_chart(dict(zip(emotion_labels, probs)))
             st.write("---")
     
     else:
         user_input = st.text_area("Enter your text here:", "I can't believe how amazing this day turned out!")
-        if st.button("Predict"):
-            predicted_emotion, probs = predict_emotion(user_input)
-            st.write(f"Predicted Emotion: **{predicted_emotion}**")
-            st.bar_chart(dict(zip(emotion_labels, probs)))
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("Predict Emotion"):
+                predicted_emotion, probs = predict_emotion(user_input)
+                st.write(f"Predicted Emotion: **{predicted_emotion}**")
+                st.bar_chart(dict(zip(emotion_labels, probs)))
+        
+        with col2:
+            if st.button("Predict Toxicity"):
+                predicted_emotion, probs = predict_emotion(user_input)
+                toxicity = predict_toxicity(predicted_emotion)
+                st.write(f"Toxicity: **{toxicity}**")
+                st.bar_chart(dict(zip(emotion_labels, probs)))
 
 # Distribution Tab
 with tab2:
