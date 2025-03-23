@@ -4,4 +4,4 @@ transformers
 peft
 datasets
 numpy
-huggingface
+os
