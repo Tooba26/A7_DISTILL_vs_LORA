@@ -1,5 +1,5 @@
 streamlit==1.39.0
-torch==2.2.2+cu118
+torch==2.2.2
 transformers==4.49.0
 peft==0.15.0
 datasets==3.2.0
