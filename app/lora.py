@@ -5,6 +5,7 @@ from peft import PeftModel
 from datasets import load_dataset
 import numpy as np
 from collections import Counter
+import os
 
 # Set device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -12,7 +13,13 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Load model and tokenizer
 @st.cache_resource
 def load_model():
-    model_path = "./best_lora_model"
+    # model_path = "./best_lora_model"
+    # tokenizer = AutoTokenizer.from_pretrained(model_path)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Construct the full path to best_lora_model
+    model_path = os.path.join(script_dir, "best_lora_model")
+    
+    # Load tokenizer and model from the local directory
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     base_model = AutoModelForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=28)
     model = PeftModel.from_pretrained(base_model, model_path)
